@@ -9,7 +9,9 @@
     <script>
       storage.sync.set({"key": {"some": "value"}}, function() {
         storage.sync.get("key", function(res){
-          alert(res[0].some);
+          storage.sync.remove("key", function(res) {
+              alert("done");
+            });
         });
       });
 

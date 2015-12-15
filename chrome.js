@@ -92,11 +92,22 @@ class StorageArea {
   }
 
   remove(keys, callback) {
-    this.items.delete(keys);
+    keys = [].concat(keys);
+    var this_items = this.items;
+
+    function removeItem(key) {
+      return this_items.delete(key);
+    }
+
+    Promise.all(keys.map(key => removeItem(key).then(
+              res => { console.log("deleted " + res.data.id)}
+            ))).then(
+      function() {if (callback) callback();}
+    );
   }
 
   clear(callback) {
-    this.items.clear();
+    this.items.clear().then(function() {if (callback) callback();});
   }
 }
 
