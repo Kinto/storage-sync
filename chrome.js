@@ -2,9 +2,18 @@
 
 
 class StorageChange {
-  constructor() {}
-
+  constructor() {
+    this.listeners = [];
+    this.changes = [];
+  }
   addListener(callback) {
+    this.listeners.push(callback);
+  }
+  emit() {
+    for (let listener of this.listeners) {
+      listener(this.changes, "somenamespace")
+    }
+    this.listeners = [];
   }
 }
 
@@ -18,6 +27,7 @@ class StorageArea {
       remote: endpoint,
       headers: {Authorization: "Basic dXNlcjpwYXNz"},
     });
+
 
     function schema() {
       let _next = 0;
@@ -77,17 +87,35 @@ class StorageArea {
     items = [].concat(items);
     var this_items = this.items;
 
-    function createItem(item) {
+    function createOrUpdateItem(item) {
       var record = {'data': Object.values(item)[0]};
-      record['id'] = Object.keys(item)[0];
+      var id = Object.keys(item)[0];
+      record['id'] = id;
       console.log(record);
-      return this_items.create(record, {useRecordId: true});
+
+      function createItem() {
+        var change = {newValue: record};
+        storage.onChanged.changes.push(change);
+        return this_items.create(record, {useRecordId: true});
+      };
+
+      function updateItem(old_record) {
+        var change = {newValue: record, oldValue: old_record};
+        storage.onChanged.changes.push(change);
+        return this_items.update(record);
+      };
+
+      return this_items.get(id).then(function(old_record) {return updateItem(old_record)}, 
+                                     function(reason) {return createItem()});
     }
 
-    Promise.all(items.map(item => createItem(item).then(
+    Promise.all(items.map(item => createOrUpdateItem(item).then(
               res => { console.log(res.data)}
             ))).then(
-      function() {if (callback) callback();}
+      function() {
+        storage.onChanged.emit();
+        if (callback) callback();
+      }
     );
   }
 
