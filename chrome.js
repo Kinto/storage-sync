@@ -96,14 +96,14 @@ class StorageArea {
       function createItem() {
         console.log('Creating record');
         var change = {newValue: record};
-        storage.onChanged.changes.push(change);
+        storage.onChanged.changes[id] = change;
         return this_items.create(record, {useRecordId: true});
       };
 
       function updateItem(old_record) {
         console.log('Updating record');
         var change = {newValue: record, oldValue: old_record};
-        storage.onChanged.changes.push(change);
+        storage.onChanged.changes[id] = change;
         return this_items.update(record);
       };
 
