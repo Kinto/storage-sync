@@ -7,7 +7,12 @@
     <script src="kinto-1.1.1.js"></script>
     <script src="chrome_es5.js"></script>
     <script>
-      storage.sync.set({"ok": 1});
+      storage.sync.set({"key": {"some": "value"}}, function() {
+        storage.sync.get("key", function(res){
+          alert(res[0].some);
+        });
+      });
+
     </script>
 
   </body>
