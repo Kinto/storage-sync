@@ -2,14 +2,28 @@
 
 
 class StorageChange {
+  constructor(oldValue, newValue) {
+    this.oldValue = oldValue;
+    this.newValue = newValue;
+  }
+}
+
+class StorageChangeEvent {
   constructor() {
     this.listeners = [];
     this.changes = [];
   }
+
   addListener(callback) {
     this.listeners.push(callback);
   }
-  emit() {
+
+  _addChange(key, oldValue, newValue) {
+    var change = new StorageChange(oldValue, newValue);
+    this.changes[key] = change;
+  }
+
+  _emit() {
     for (let listener of this.listeners) {
       listener(this.changes, "somenamespace")
     }
@@ -95,15 +109,13 @@ class StorageArea {
 
       function createItem() {
         console.log('Creating record');
-        var change = {newValue: record};
-        storage.onChanged.changes[id] = change;
+        storage.onChanged._addChange(id, null, record);
         return this_items.create(record, {useRecordId: true});
       };
 
       function updateItem(old_record) {
         console.log('Updating record');
-        var change = {newValue: record, oldValue: old_record};
-        storage.onChanged.changes[id] = change;
+        storage.onChanged._addChange(id, old_record, record);
         return this_items.update(record);
       };
 
@@ -115,7 +127,7 @@ class StorageArea {
               res => { console.log(res.data)}
             ))).then(
       function() {
-        storage.onChanged.emit();
+        storage.onChanged._emit();
         if (callback) callback();
       }
     );
@@ -142,7 +154,7 @@ class StorageArea {
 }
 
 
-const storage = {onChanged: new StorageChange(),
+const storage = {onChanged: new StorageChangeEvent(),
                  sync: new StorageArea(),
                  local: new StorageArea(),
                  managed: new StorageArea()};
