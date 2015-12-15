@@ -13,7 +13,7 @@ class StorageChange {
     for (let listener of this.listeners) {
       listener(this.changes, "somenamespace")
     }
-    this.listeners = [];
+    this.changes = [];
   }
 }
 
@@ -94,12 +94,14 @@ class StorageArea {
       console.log(record);
 
       function createItem() {
+        console.log('Creating record');
         var change = {newValue: record};
         storage.onChanged.changes.push(change);
         return this_items.create(record, {useRecordId: true});
       };
 
       function updateItem(old_record) {
+        console.log('Updating record');
         var change = {newValue: record, oldValue: old_record};
         storage.onChanged.changes.push(change);
         return this_items.update(record);
