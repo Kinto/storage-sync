@@ -27,7 +27,6 @@
           alert('Settings saved');
         });
       }
-
       chrome.storage.onChanged.addListener(function(changes, namespace) {
         for (key in changes) {
           var storageChange = changes[key];
@@ -39,7 +38,6 @@
                       storageChange.newValue);
         }
       });
-
     </script>
 
   </body>
