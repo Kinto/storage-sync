@@ -78,7 +78,7 @@ class StorageArea {
     var this_items = this.items;
 
     function createItem(item) {
-      var record = Object.values(item)[0];
+      var record = {'data': Object.values(item)[0]};
       record['id'] = Object.keys(item)[0];
       console.log(record);
       return this_items.create(record, {useRecordId: true});
@@ -116,4 +116,7 @@ const storage = {onChanged: new StorageChange(),
                  sync: new StorageArea(),
                  local: new StorageArea(),
                  managed: new StorageArea()};
+
+const chrome = {storage: storage};
+
 

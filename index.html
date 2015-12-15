@@ -4,16 +4,30 @@
   <meta charset="utf-8">
   </head>
   <body>
+      <textarea id="code"></textarea>
+      <button onclick="saveChanges()">Save</button>
+
     <script src="kinto-1.1.1.js"></script>
     <script src="chrome_es5.js"></script>
     <script>
-      storage.sync.set({"key": {"some": "value"}}, function() {
-        storage.sync.get("key", function(res){
-          storage.sync.remove("key", function(res) {
-              alert("done");
-            });
+      // example from the https://developer.chrome.com/extensions/storage page
+      function saveChanges() {
+        // Get a value saved in a form.
+        var theValue = document.getElementById("code").value;
+
+        // Check that there's some code there.
+        if (!theValue) {
+          alert('Error: No value specified');
+          return;
+        }
+
+        // Save it using the Chrome extension storage API.
+        chrome.storage.sync.set({'value': theValue}, function() {
+          // Notify that we saved.
+          alert('Settings saved');
         });
-      });
+      }
+
 
     </script>
 
