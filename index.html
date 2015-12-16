@@ -23,8 +23,11 @@
 
         // Save it using the Chrome extension storage API.
         chrome.storage.sync.set({'value': theValue}, function() {
-          // Notify that we saved.
-          alert('Settings saved');
+          // Notify that we saved
+          chrome.storage.sync.get(null, function(items) {
+            console.log(items.value);
+            alert('Settings saved');
+          });
         });
       }
       chrome.storage.onChanged.addListener(function(changes, namespace) {

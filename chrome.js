@@ -20,7 +20,6 @@ class StorageChangeEvent {
   }
 
   _addChange(key, oldValue, newValue) {
-    console.log('adding change event in ' + this.areaName);
     var change = new StorageChange(oldValue, newValue);
     this.changes[key] = change;
   }
@@ -92,17 +91,14 @@ class StorageArea {
   }
 
   get(keys, callback) {
-    keys = [].concat(keys);
     var this_items = this.items;
     var records = [];
 
     function getRecord(key) {
-      console.log("Looking for " + key);
-
       return this_items.get(key).then(function (res) {
         var promise = new Promise(function(resolve, reject) {
           if (res) {
-            records.push(res.data);
+            records[res.data.id] = res.data.data;
             resolve(res.data); 
           } else {
             reject('boom');
@@ -112,13 +108,25 @@ class StorageArea {
       });
 
     }
+    function getRecords(keys) {
+      return Promise.all(keys.map(key => getRecord(key))).then(
+        function() {
+          if (callback) callback(records);
+        }
+      );
+    }
 
-    Promise.all(keys.map(key => getRecord(key))).then(
-      function() {
-        console.log(records);
-        if (callback) callback(records);
-      }
-    );
+    if (!keys) {
+      keys = [];
+      // XXX suboptimal: fetching all ids - then doing a second query
+      return this_items.list().then(function(res) {
+        res.data.map(r => keys.push(r.id));
+       }).then(function() {return getRecords(keys)});
+    } else {
+      keys = [].concat(keys);
+      return getRecords(keys);
+    }
+
 
   }
 
@@ -135,21 +143,18 @@ class StorageArea {
       var record = {'data': Object.values(item)[0]};
       var id = Object.keys(item)[0];
       record['id'] = id;
-      console.log(record);
 
       function createItem() {
-        console.log('Creating record');
         storage.onChanged._addChange(areaName, id, null, record);
         return this_items.create(record, {useRecordId: true});
       };
 
       function updateItem(old_record) {
-        console.log('Updating record');
         storage.onChanged._addChange(areaName, id, old_record, record);
         return this_items.update(record);
       };
 
-      return this_items.get(id).then(function(old_record) {return updateItem(old_record)}, 
+      return this_items.get(id).then(function(old_record) {return updateItem(old_record)},
                                      function(reason) {return createItem()});
     }
 
