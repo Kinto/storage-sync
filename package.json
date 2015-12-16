@@ -19,7 +19,8 @@
   },
   "dependencies": {
     "babel-core": ">=6.3.13",
-    "btoa": "^1.1.2"
+    "btoa": "^1.1.2",
+    "kinto": "^1.1.2"
   },
   "devDependencies": {
     "babel-eslint": ">=4.1.6",
