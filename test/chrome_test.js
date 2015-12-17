@@ -64,7 +64,8 @@ describe("StorageArea", () => {
 	  */
       area.set({"something": 1}, function() {
         done();
-      });
+      })
+      .catch(done);
     });
   });
 
