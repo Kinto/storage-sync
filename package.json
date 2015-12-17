@@ -4,7 +4,7 @@
   "description": "chrome.storage.sync wrapper for Kinto.",
   "main": "lib/chrome.js",
   "scripts": {
-    "build": "babel --presets es2015 lib/chrome.js -o demo/chrome_es5.js",
+    "dist": "./node_modules/.bin/browserify -d -s chrome -e lib/chrome.js -o demo/chrome_es5.js -t [ babelify --presets [ es2015 ] --sourceMapRelative . ]",
     "test": "npm run lint && npm run test-nocover",
     "test-nocover": "node_modules/.bin/_mocha --compilers js:babel-core/register 'test/**/*_test.js'",
     "lint": "eslint lib/"
@@ -19,12 +19,13 @@
   },
   "dependencies": {
     "babel-core": ">=6.3.13",
+    "babel-cli": ">=6.3.13",
     "btoa": "^1.1.2",
     "kinto": "^1.1.2"
   },
   "devDependencies": {
     "babel-eslint": ">=4.1.6",
-    "babelify": "^6.1.3",
+    "babelify": ">=7.2.0",
     "browserify": "^12.0.0",
     "chai": "^3.2.0",
     "chai-as-promised": "^5.0.0",
