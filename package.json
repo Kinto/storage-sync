@@ -6,7 +6,7 @@
   "scripts": {
     "dist": "ulimit -n 2560 && ./node_modules/.bin/browserify -d -s chrome -e lib/chrome.js -o demo/chrome_es5.js -t [ babelify --presets [ es2015 ] --sourceMapRelative . ]",
     "test": "npm run lint && npm run test-nocover",
-    "test-nocover": "node_modules/.bin/_mocha --compilers js:babel-core/register 'test/**/*_test.js'",
+    "test-nocover": "node_modules/.bin/_mocha --compilers js:babel-core/register --require ./test/_setup.js 'test/**/*_test.js'",
     "lint": "eslint lib/"
   },
   "repository": {
@@ -21,7 +21,8 @@
     "babel-core": ">=6.3.13",
     "babel-cli": ">=6.3.13",
     "btoa": "^1.1.2",
-    "kinto": "^1.1.2"
+    "kinto": "^1.1.2",
+    "fake-indexeddb": "^1.0.3"
   },
   "devDependencies": {
     "babel-eslint": ">=4.1.6",
