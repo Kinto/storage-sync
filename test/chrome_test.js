@@ -51,7 +51,7 @@ describe("StorageArea", () => {
 
   /** @test {StorageArea#set} */
   describe("#set", () => {
-    it("should set a value in IDB", (done) => {
+    it("set/get a value in IDB", (done) => {
       const area = new StorageArea("http://localhost:8080/v1/", "sync");
 
       area.set({"something": 1}, function () {
@@ -61,6 +61,21 @@ describe("StorageArea", () => {
         }).catch(done);
       }).catch(done);
     });
+
+    it("set/remove a value in IDB", (done) => {
+      const area = new StorageArea("http://localhost:8080/v1/", "sync");
+
+      area.set({"something": 1}, function () {
+        area.remove("something", function() {
+          area.get("something", function(items) {
+            expect(items.something).to.be.undefined;
+            done();
+          }).catch(done);
+        }).catch(done);
+      }).catch(done);
+    });
+
+
   });
 
 });
