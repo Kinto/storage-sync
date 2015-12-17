@@ -78,4 +78,32 @@ describe("StorageArea", () => {
 
   });
 
+  /** @test {StorageArea#get} */
+  describe("#get", () => {
+
+    it("get a unexisting keys won't set a attribute", (done) => {
+      const area = new StorageArea("http://localhost:8080/v1/", "sync");
+      area.get("something", function(items) {
+        expect(items.something).to.be.undefined;
+            done();
+      }).catch(done);
+    });
+
+   it("get(null) returns all keys", (done) => {
+      const area = new StorageArea("http://localhost:8080/v1/", "sync");
+
+      area.set({"something": 1}, function () {
+        area.set({"else": 2}, function () {
+          area.get(null, function(items) {
+            expect(items.something).to.eql(1);
+            expect(items.else).to.eql(2);
+            done();
+          }).catch(done);
+        }).catch(done);
+      }).catch(done);
+
+    });
+
+  });
+
 });
