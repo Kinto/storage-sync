@@ -53,19 +53,13 @@ describe("StorageArea", () => {
   describe("#set", () => {
     it("should set a value in IDB", (done) => {
       const area = new StorageArea("http://localhost:8080/v1/", "sync");
-      console.log("bla");
-      /*
-	  area.set({"something": 1}, function () {
-        area.get("OK", function(res) {
-          expect(res).to.eql({"something": 1});
+
+      area.set({"something": 1}, function () {
+        area.get("something", function(items) {
+          expect(items.something).to.eql(1);
           done();
-        });
-      });
-	  */
-      area.set({"something": 1}, function() {
-        done();
-      })
-      .catch(done);
+        }).catch(done);
+      }).catch(done);
     });
   });
 
