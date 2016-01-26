@@ -1,6 +1,13 @@
 "use strict";
 
 /**
+ * Activate transpilation before running tests.
+ */
+require("babel-core/register")({
+  presets: ["es2015"]
+});
+
+/**
  * Test environment setup.
  *
  * In FakeIndexedDB, symbols are exposed using ``FDB`` prefixes in names.
