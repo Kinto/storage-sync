@@ -10,11 +10,11 @@ chai.config.includeStack = true;
 
 
 /** @test {StorageChange} */
-describe("StorageChange", () => {
+describe("StorageChange", function() {
 
   /** @test {StorageChange#constructor} */
-  describe("#constructor", () => {
-    it("should expose oldValue and newValue", () => {
+  describe("#constructor", function() {
+    it("should expose oldValue and newValue", function() {
       const changes = new StorageChange("old", "new");
       expect(changes.oldValue).to.eql("old");
       expect(changes.newValue).to.eql("new");
@@ -24,11 +24,11 @@ describe("StorageChange", () => {
 
 
 /** @test {StorageChangeEvent} */
-describe("StorageChangeEvent", () => {
+describe("StorageChangeEvent", function() {
 
   /** @test {StorageChangeEvent#constructor} */
-  describe("#constructor", () => {
-    it("should expose areaName and start with no listeners", () => {
+  describe("#constructor", function() {
+    it("should expose areaName and start with no listeners", function() {
       const changes = new StorageChangeEvent("sync");
       expect(changes.areaName).to.eql("sync");
       expect(changes.listeners).to.eql([]);
@@ -38,22 +38,24 @@ describe("StorageChangeEvent", () => {
 
 
 /** @test {StorageArea} */
-describe("StorageArea", () => {
+describe("StorageArea", function() {
+  const area = new StorageArea("http://localhost:8080/v1/", "sync");
+
+  afterEach(function(done) {
+    area.clear(done);
+  });
 
   /** @test {StorageArea#constructor} */
-  describe("#constructor", () => {
-    it("should expose endpoint and areaName", () => {
-      const area = new StorageArea("http://localhost:8080/v1/", "sync");
+  describe("#constructor", function() {
+    it("should expose endpoint and areaName", function() {
       expect(area.areaName).to.eql("sync");
       expect(area.endpoint).to.eql("http://localhost:8080/v1/");
     });
   });
 
   /** @test {StorageArea#set} */
-  describe("#set", () => {
-    it("set/get a value in IDB", (done) => {
-      const area = new StorageArea("http://localhost:8080/v1/", "sync");
-
+  describe("#set", function() {
+    it("set/get a value in IDB", function(done) {
       area.set({"something": 1}, function () {
         area.get("something", function(items) {
           expect(items.something).to.eql(1);
@@ -62,9 +64,7 @@ describe("StorageArea", () => {
       }).catch(done);
     });
 
-    it("set/remove a value in IDB", (done) => {
-      const area = new StorageArea("http://localhost:8080/v1/", "sync");
-
+    it("set/remove a value in IDB", function(done) {
       area.set({"something": 1}, function () {
         area.remove("something", function() {
           area.get("something", function(items) {
@@ -79,19 +79,16 @@ describe("StorageArea", () => {
   });
 
   /** @test {StorageArea#get} */
-  describe("#get", () => {
+  describe("#get", function() {
 
-    it("get a unexisting keys won't set a attribute", (done) => {
-      const area = new StorageArea("http://localhost:8080/v1/", "sync");
+    it("get a unexisting keys won't set a attribute", function(done) {
       area.get("something", function(items) {
         expect(items.something).to.be.undefined;
             done();
       }).catch(done);
     });
 
-   it("get(null) returns all keys", (done) => {
-      const area = new StorageArea("http://localhost:8080/v1/", "sync");
-
+   it("get(null) returns all keys", function(done) {
       area.set({"something": 1}, function () {
         area.set({"else": 2}, function () {
           area.get(null, function(items) {
