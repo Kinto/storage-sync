@@ -87,8 +87,8 @@ describe("StorageArea", function() {
         area.get("something", function(items) {
           expect(items.something).to.eql(1);
           done();
-        }).catch(done);
-      }).catch(done);
+        });
+      });
     });
 
     it("set/remove a value in IDB", function(done) {
@@ -97,12 +97,24 @@ describe("StorageArea", function() {
           area.get("something", function(items) {
             expect(items.something).to.be.undefined;
             done();
-          }).catch(done);
-        }).catch(done);
-      }).catch(done);
+          });
+        });
+      });
     });
 
-
+    it("can set a previously removed record", function(done) {
+      area.set({"something": 1}, function () {
+        area.remove("something", function() {
+          area.set({"something": 2}, function() {
+            area.get(null, function(items) {
+              console.log(items);
+              expect(items).to.deep.eql({ something: 2 });
+              done();
+            });
+          });
+        });
+      });
+    })
   });
 
   /** @test {StorageArea#get} */
