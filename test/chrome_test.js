@@ -110,21 +110,21 @@ describe("StorageArea", function() {
 
     it("get a unexisting keys won't set a attribute", function(done) {
       area.get("something", function(items) {
-        expect(items.something).to.be.undefined;
-            done();
-      }).catch(done);
+        expect(items).to.deep.eql({});
+        done();
+      });
     });
 
-   it("get(null) returns all keys", function(done) {
+    it("get(null) returns all keys", function(done) {
       area.set({"something": 1}, function () {
         area.set({"else": 2}, function () {
           area.get(null, function(items) {
             expect(items.something).to.eql(1);
             expect(items.else).to.eql(2);
             done();
-          }).catch(done);
-        }).catch(done);
-      }).catch(done);
+          });
+        });
+      });
 
     });
 
