@@ -103,4 +103,15 @@ describe("StorageArea", function() {
 
   });
 
+  /** @test {StorageArea#getBytesInUse} */
+  describe("#getBytesInUse", function() {
+
+    it("returns 0", function(done) {
+      area.getBytesInUse(null, function(inUse) {
+        expect(inUse).to.eql(0);
+        done();
+      });
+    });
+  });
+
 });
