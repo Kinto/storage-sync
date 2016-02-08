@@ -43,7 +43,7 @@ describe("StorageArea", function() {
   const area = new StorageArea("sync");
 
   afterEach(function(done) {
-    area.clear(done);
+    area.items.clear().then(() => done());
   });
 
   /** @test {StorageArea#constructor} */
@@ -107,7 +107,6 @@ describe("StorageArea", function() {
         area.remove("something", function() {
           area.set({"something": 2}, function() {
             area.get(null, function(items) {
-              console.log(items);
               expect(items).to.deep.eql({ something: 2 });
               done();
             });
@@ -153,4 +152,34 @@ describe("StorageArea", function() {
     });
   });
 
+  /** @test {StorageArea#clear} */
+  describe("#clear", function() {
+    beforeEach(function(done) {
+      area.set({ foo: "bar", baz: "bar" }, function() {
+        area.clear(function() {
+          done();
+        });
+      });
+    });
+
+    it("deletes all records", function(done) {
+      area.get(null, function(items) {
+        expect(items).to.deep.eql({});
+        done();
+      });
+    });
+
+    it("only deletes records virtually", function(done) {
+      area.items.list({}, { includeDeleted: true }).then(arr => {
+        expect(arr).to.deep.eql({
+         data: [
+           { id: "baz", data: "bar", _status: "deleted" },
+           { id: "foo", data: "bar", _status: "deleted" }
+         ],
+          permissions: {}
+        });
+        done();
+      });
+    });
+  });
 });
