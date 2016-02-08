@@ -10,6 +10,13 @@
     <!--script src="kinto-1.1.1.js"></script-->
     <script src="chrome_es5.js"></script>
     <script>
+      chrome.storage.sync.config = {
+         type: "kinto",
+         interval: 6000, // milliseconds
+         remote: "https://kinto.dev.mozaws.net/v1",
+         headers: {Authorization: "Basic " + btoa("user:pass")}
+      };
+
       // example from the https://developer.chrome.com/extensions/storage page
       function saveChanges() {
         // Get a value saved in a form.
