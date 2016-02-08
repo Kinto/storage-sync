@@ -1,6 +1,7 @@
 "use strict";
 
 import chai, { expect } from "chai";
+import Kinto from "kinto";
 import chaiAsPromised from "chai-as-promised";
 import {StorageChange, StorageChangeEvent, StorageArea} from "../lib/chrome";
 
@@ -39,7 +40,7 @@ describe("StorageChangeEvent", function() {
 
 /** @test {StorageArea} */
 describe("StorageArea", function() {
-  const area = new StorageArea("http://localhost:8080/v1/", "sync");
+  const area = new StorageArea("sync");
 
   afterEach(function(done) {
     area.clear(done);
@@ -47,9 +48,35 @@ describe("StorageArea", function() {
 
   /** @test {StorageArea#constructor} */
   describe("#constructor", function() {
-    it("should expose endpoint and areaName", function() {
+    it("should expose areaName", function() {
       expect(area.areaName).to.eql("sync");
-      expect(area.endpoint).to.eql("http://localhost:8080/v1/");
+    });
+  });
+
+  describe(".config setter", function() {
+    it("should set the config", function() {
+      const area = new StorageArea("sync");
+      area.config = { type: "kinto", remote: "http://localhost:8080/v1/" };
+      expect(area.config.remote).to.eql("http://localhost:8080/v1/");
+    });
+
+    it("should configure a sync timer", function(done) {
+      const area = new StorageArea("sync");
+      area.config = { type: "kinto", interval: 123000 };
+      //TODO: mock Kinto.js Collection#sync
+      Promise.resolve().then(function() {
+        expect(area.syncTimer._idleTimeout).to.eql(123000);
+        done();
+      });
+    });
+
+    it("should respect MIN_INTERVAL of 1000ms", function(done) {
+      const area = new StorageArea("sync");
+      area.config = { type: "kinto", interval: 123 };
+      setTimeout(function() {
+        expect(area.syncTimer).to.eql(undefined);
+        done();
+      });
     });
   });
 

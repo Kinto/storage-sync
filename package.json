@@ -21,7 +21,7 @@
     "babel-core": ">=6.3.13",
     "babel-cli": ">=6.3.13",
     "btoa": "^1.1.2",
-    "kinto": "^1.1.2",
+    "kinto": "^1.2.0",
     "fake-indexeddb": "^1.0.3"
   },
   "devDependencies": {
