@@ -3,6 +3,7 @@
 import chai, { expect } from "chai";
 import Kinto from "kinto";
 import chaiAsPromised from "chai-as-promised";
+import sinon from "sinon";
 import {StorageChange, StorageChangeEvent, StorageArea} from "../lib/chrome";
 
 chai.use(chaiAsPromised);
@@ -147,6 +148,57 @@ describe("StorageArea", function() {
     it("returns 0", function(done) {
       area.getBytesInUse(null, function(inUse) {
         expect(inUse).to.eql(0);
+        done();
+      });
+    });
+  });
+
+  /** @test {StorageArea#remove} */
+  describe("#remove", function() {
+    it("removes a single entry", function(done) {
+      area.set({ foo: "bar" }, function() {
+        area.remove("foo", function() {
+          area.get("foo", function(items) {
+            expect(items).to.deep.eql({});
+            done();
+          });
+        });
+      });
+    });
+
+    it("silently ignores a missing entry", function(done) {
+      area.remove("nonexisting", function() {
+        done();
+      });
+    });
+
+    it("does not remove other entries", function(done) {
+      area.set({ foo: "bar", baz: "bar" }, function() {
+        area.remove("baz", function() {
+          area.get("foo", function(items) {
+            expect(items.foo).to.eql("bar");
+            done();
+          });
+        });
+      });
+    });
+
+    it("removes an array of keys", function(done) {
+      area.set({ foo: "bar", baz: "bar" }, function() {
+        area.remove(["foo", "baz"], function() {
+          area.get(["foo", "baz"], function(items) {
+            expect(items).to.deep.eql({});
+            done();
+          });
+        });
+      });
+    });
+
+    it("treats the callback parameter as optional", function(done) {
+      var spy = sinon.spy(area.items, 'delete');
+      area.set({ foo: "bar" }, function() {
+        area.remove(["foo"]);
+        expect(spy.calledWith("foo")).to.eql(true);
         done();
       });
     });
