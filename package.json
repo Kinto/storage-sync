@@ -2,6 +2,7 @@
   "name": "kinto-chrome",
   "version": "0.1.0",
   "description": "chrome.storage.sync wrapper for Kinto.",
+  "license": "Apache-2.0",
   "main": "lib/chrome.js",
   "scripts": {
     "dist": "ulimit -n 2560 && ./node_modules/.bin/browserify -d -s chrome -e lib/chrome.js -o demo/chrome_es5.js -t [ babelify --presets [ es2015 ] --sourceMapRelative . ]",
@@ -18,11 +19,12 @@
     "localStorage": false
   },
   "dependencies": {
-    "babel-core": ">=6.3.13",
     "babel-cli": ">=6.3.13",
+    "babel-core": ">=6.3.13",
     "btoa": "^1.1.2",
+    "fake-indexeddb": "^1.0.3",
     "kinto": "^1.2.0",
-    "fake-indexeddb": "^1.0.3"
+    "md5": "2.0.0"
   },
   "devDependencies": {
     "babel-eslint": ">=4.1.6",
