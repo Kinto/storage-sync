@@ -2,9 +2,10 @@
 
 import chai, { expect } from "chai";
 import Kinto from "kinto";
+import btoa from "btoa";
 import chaiAsPromised from "chai-as-promised";
 import sinon from "sinon";
-import {StorageChange, StorageChangeEvent, StorageArea} from "../lib/chrome";
+import {StorageChange, StorageChangeEvent, StorageArea, storage} from "../lib/chrome";
 
 chai.use(chaiAsPromised);
 chai.should();
@@ -42,8 +43,26 @@ describe("StorageChangeEvent", function() {
 /** @test {StorageArea} */
 describe("StorageArea", function() {
   const area = new StorageArea("sync");
+  let sandbox, consoleSpy, syncStub, syncResults;
+
+  beforeEach(function() {
+    sandbox = sinon.sandbox.create();
+    consoleSpy = sandbox.spy(console, "error");
+    syncStub = sandbox.stub(area.items, "sync", function() {
+      return Promise.resolve(syncResults);
+    });
+
+    syncResults = {
+      created: [],
+      updated: [],
+      deleted: [],
+      conflicts: [],
+      ok: true
+    };
+  });
 
   afterEach(function(done) {
+    sandbox.restore();
     area.items.clear().then(() => done(), done);
   });
 
@@ -56,28 +75,40 @@ describe("StorageArea", function() {
 
   describe(".config setter", function() {
     it("should set the config", function() {
-      const area = new StorageArea("sync");
       area.config = { type: "kinto", remote: "http://localhost:8080/v1/" };
       expect(area.config.remote).to.eql("http://localhost:8080/v1/");
     });
 
     it("should configure a sync timer", function(done) {
-      const area = new StorageArea("sync");
-      area.config = { type: "kinto", interval: 123000 };
-      //TODO: mock Kinto.js Collection#sync
-      Promise.resolve().then(function() {
+      area.config = {
+        type: "kinto",
+        interval: 123000,
+        remote: "https://foo.com/",
+        headers: {
+          Authorization: "Basic " + btoa("testuser:s3cr3t")
+        }
+      };
+      setTimeout(function() {
+        expect(consoleSpy.called).to.eql(false);
+        expect(syncStub.calledWith({
+          remote: "https://foo.com/",
+          headers: {
+            Authorization: "Basic dGVzdHVzZXI6czNjcjN0"
+          }
+        })).to.eql(true);
         expect(area.syncTimer._idleTimeout).to.eql(123000);
+        clearInterval(area.syncTimer);
         done();
-      });
+      }); // give time for call to stubbed sync method to complete
     });
 
     it("should respect MIN_INTERVAL of 1000ms", function(done) {
-      const area = new StorageArea("sync");
       area.config = { type: "kinto", interval: 123 };
-      setTimeout(function() {
-        expect(area.syncTimer).to.eql(undefined);
-        done();
-      });
+      expect(consoleSpy
+          .calledWith("Sync interval should be at least 1000 milliseconds"))
+          .to.eql(true);
+      expect(syncStub.called).to.eql(false);
+      done();
     });
   });
 
@@ -209,7 +240,8 @@ describe("StorageArea", function() {
     });
 
     it("treats the callback parameter as optional", function(done) {
-      var spy = sinon.spy(area.items, 'delete');
+      const spy = sandbox.spy(area.items, "delete");
+
       area.set({ foo: "bar" }, function() {
         area.remove(["foo"]);
         expect(spy.calledWith("acbd18db-4cc2-f85c-edef-654fccc4a4d8")).to.eql(true);
@@ -256,6 +288,116 @@ describe("StorageArea", function() {
         });
         done();
       });
+    });
+  });
+
+  describe("sync process", function() {
+    let changeSpy;
+
+    beforeEach(function() {
+      //TODO: make this nicer once https://github.com/Kinto/kinto-chrome/issues/20
+      //is fixed:
+      if (changeSpy) {
+        changeSpy.reset();
+      } else {
+        changeSpy = sinon.spy();
+        storage.onChanged.addListener(changeSpy);
+      }
+
+      area.config = {
+        type: "kinto",
+        interval: 123000,
+        headers: {
+          Authorization: "Basic " + btoa("testuser:s3cr3t")
+        }
+      };
+    });
+
+    it("fires events for created records", function(done) {
+      syncResults.created = [{
+        id: "acbd18db-4cc2-f85c-edef-654fccc4a4d8",
+        key: "foo",
+        data: "bar"
+      }];
+      setTimeout(function() {
+        expect(changeSpy.args[0]).to.deep.eql([
+          {
+            foo: {
+              oldValue: null,
+              newValue: "bar"
+            }
+          },
+          "sync"
+        ]);
+        done();
+      }); // give time for call to stubbed sync method to complete
+    });
+
+    it("fires events for updated records", function(done) {
+      syncResults.updated = [{
+        id: "acbd18db-4cc2-f85c-edef-654fccc4a4d8",
+        key: "foo",
+        data: "bar"
+      }];
+      setTimeout(function() {
+        expect(changeSpy.args[0]).to.deep.eql([
+          {
+            foo: {
+              oldValue: "unknown",
+              newValue: "bar"
+            }
+          },
+          "sync"
+        ]);
+        done();
+      }); // give time for call to stubbed sync method to complete
+    });
+
+    it("fires events for deleted records", function(done) {
+      syncResults.deleted = [{
+        id: "acbd18db-4cc2-f85c-edef-654fccc4a4d8",
+        key: "foo",
+        data: "bar"
+      }];
+      setTimeout(function() {
+        expect(changeSpy.args[0]).to.deep.eql([
+          {
+            foo: {
+              oldValue: "bar",
+              newValue: null
+            }
+          },
+          "sync"
+        ]);
+        done();
+      }); // give time for call to stubbed sync method to complete
+    });
+
+    it("resolves conflicts by letting server win", function(done) {
+      syncResults.conflicts = [{
+        local: {
+          id: "acbd18db-4cc2-f85c-edef-654fccc4a4d8",
+          key: "foo",
+          data: "bar"
+        },
+        remote: {
+          id: "acbd18db-4cc2-f85c-edef-654fccc4a4d8",
+          key: "foo",
+          data: "baz"
+        }
+      }];
+      setTimeout(function() {
+        expect(changeSpy.args[0]).to.deep.eql([
+          {
+            foo: {
+              oldValue: "bar",
+              newValue: "baz"
+            }
+          },
+          "sync"
+        ]);
+        done();
+      }); // give time for call to stubbed sync method to complete
     });
   });
 });
