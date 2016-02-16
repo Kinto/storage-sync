@@ -44,7 +44,7 @@ describe("StorageArea", function() {
   const area = new StorageArea("sync");
 
   afterEach(function(done) {
-    area.items.clear().then(() => done());
+    area.items.clear().then(() => done(), done);
   });
 
   /** @test {StorageArea#constructor} */
@@ -83,34 +83,49 @@ describe("StorageArea", function() {
 
   /** @test {StorageArea#set} */
   describe("#set", function() {
+    beforeEach(function(done) {
+      area.set({"something": 1}, done);
+    });
+
     it("set/get a value in IDB", function(done) {
-      area.set({"something": 1}, function () {
+      area.get("something", function(items) {
+        expect(items.something).to.eql(1);
+        done();
+      });
+    });
+
+    it("set id, key, and data", function(done) {
+      area.items.list({}, { includeDeleted: true }).then(arr => {
+        expect(arr).to.deep.eql({
+         data: [
+           {
+             id: '437b930d-b84b-8079-c2dd-804a71936b5f',
+             key: 'something',
+             data: 1,
+             _status: 'created'
+           }
+         ],
+          permissions: {}
+        });
+        done();
+      });
+    });
+
+    it("set/remove a value in IDB", function(done) {
+      area.remove("something", function() {
         area.get("something", function(items) {
-          expect(items.something).to.eql(1);
+          expect(items.something).to.be.undefined;
           done();
         });
       });
     });
 
-    it("set/remove a value in IDB", function(done) {
-      area.set({"something": 1}, function () {
-        area.remove("something", function() {
-          area.get("something", function(items) {
-            expect(items.something).to.be.undefined;
-            done();
-          });
-        });
-      });
-    });
-
     it("can set a previously removed record", function(done) {
-      area.set({"something": 1}, function () {
-        area.remove("something", function() {
-          area.set({"something": 2}, function() {
-            area.get(null, function(items) {
-              expect(items).to.deep.eql({ something: 2 });
-              done();
-            });
+      area.remove("something", function() {
+        area.set({"something": 2}, function() {
+          area.get(null, function(items) {
+            expect(items).to.deep.eql({ something: 2 });
+            done();
           });
         });
       });
@@ -137,7 +152,6 @@ describe("StorageArea", function() {
           });
         });
       });
-
     });
 
   });
@@ -198,7 +212,7 @@ describe("StorageArea", function() {
       var spy = sinon.spy(area.items, 'delete');
       area.set({ foo: "bar" }, function() {
         area.remove(["foo"]);
-        expect(spy.calledWith("foo")).to.eql(true);
+        expect(spy.calledWith("acbd18db-4cc2-f85c-edef-654fccc4a4d8")).to.eql(true);
         done();
       });
     });
@@ -225,8 +239,18 @@ describe("StorageArea", function() {
       area.items.list({}, { includeDeleted: true }).then(arr => {
         expect(arr).to.deep.eql({
          data: [
-           { id: "baz", data: "bar", _status: "deleted" },
-           { id: "foo", data: "bar", _status: "deleted" }
+           {
+             id: '73feffa4-b7f6-bb68-e44c-f984c85f6e88',
+             key: 'baz',
+             data: 'bar',
+             _status: 'deleted'
+           },
+           {
+             id: 'acbd18db-4cc2-f85c-edef-654fccc4a4d8',
+             key: 'foo',
+             data: 'bar',
+             _status: 'deleted'
+           }
          ],
           permissions: {}
         });
