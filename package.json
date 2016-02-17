@@ -23,11 +23,12 @@
     "babel-core": ">=6.3.13",
     "btoa": "^1.1.2",
     "fake-indexeddb": "^1.0.3",
-    "kinto": "^1.2.0",
+    "kinto": "git://github.com/michielbdejong/kinto.js#tag-up",
     "md5": "2.0.0"
   },
   "devDependencies": {
     "babel-eslint": ">=4.1.6",
+    "babel-polyfill": ">=6.5.0",
     "babelify": ">=7.2.0",
     "browserify": "^12.0.0",
     "chai": "^3.2.0",
