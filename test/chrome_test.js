@@ -135,13 +135,25 @@ describe("StorageArea", function() {
       }); // give time for call to stubbed sync method to complete
     });
 
-    it("should respect MIN_INTERVAL of 1000ms", function(done) {
-      area.config = { type: "kinto", interval: 123 };
-      expect(consoleSpy
-          .calledWith("Sync interval should be at least 1000 milliseconds"))
-          .to.eql(true);
+    it("checks config is an object", function() {
+      expect(function() {
+        area.config = 42;
+      }).to.Throw(Error, "config should be an object");
       expect(syncStub.called).to.eql(false);
-      done();
+    });
+
+    it("checks type equals \"kinto\"", function() {
+      expect(function() {
+        area.config = { type: "foo", interval: 123000 };
+      }).to.Throw(Error, /Unsupported type/);
+      expect(syncStub.called).to.eql(false);
+    });
+
+    it("checks MIN_INTERVAL of 1000ms", function() {
+      expect(function() {
+        area.config = { type: "kinto", interval: 123 };
+      }).to.Throw(Error, /at least 1000/);
+      expect(syncStub.called).to.eql(false);
     });
   });
 
