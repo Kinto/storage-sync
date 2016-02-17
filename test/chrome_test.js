@@ -1,7 +1,6 @@
 "use strict";
 
 import chai, { expect } from "chai";
-import Kinto from "kinto";
 import btoa from "btoa";
 import chaiAsPromised from "chai-as-promised";
 import sinon from "sinon";
@@ -128,14 +127,14 @@ describe("StorageArea", function() {
     it("set id, key, and data", function(done) {
       area.items.list({}, { includeDeleted: true }).then(arr => {
         expect(arr).to.deep.eql({
-         data: [
-           {
-             id: '437b930d-b84b-8079-c2dd-804a71936b5f',
-             key: 'something',
-             data: 1,
-             _status: 'created'
-           }
-         ],
+          data: [
+            {
+              id: "437b930d-b84b-8079-c2dd-804a71936b5f",
+              key: "something",
+              data: 1,
+              _status: "created"
+            }
+          ],
           permissions: {}
         });
         done();
@@ -160,7 +159,7 @@ describe("StorageArea", function() {
           });
         });
       });
-    })
+    });
   });
 
   /** @test {StorageArea#get} */
@@ -270,20 +269,20 @@ describe("StorageArea", function() {
     it("only deletes records virtually", function(done) {
       area.items.list({}, { includeDeleted: true }).then(arr => {
         expect(arr).to.deep.eql({
-         data: [
-           {
-             id: '73feffa4-b7f6-bb68-e44c-f984c85f6e88',
-             key: 'baz',
-             data: 'bar',
-             _status: 'deleted'
-           },
-           {
-             id: 'acbd18db-4cc2-f85c-edef-654fccc4a4d8',
-             key: 'foo',
-             data: 'bar',
-             _status: 'deleted'
-           }
-         ],
+          data: [
+            {
+              id: "73feffa4-b7f6-bb68-e44c-f984c85f6e88",
+              key: "baz",
+              data: "bar",
+              _status: "deleted"
+            },
+            {
+              id: "acbd18db-4cc2-f85c-edef-654fccc4a4d8",
+              key: "foo",
+              data: "bar",
+              _status: "deleted"
+            }
+          ],
           permissions: {}
         });
         done();
