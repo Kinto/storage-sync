@@ -130,7 +130,7 @@ describe("StorageArea", function() {
           }
         })).to.eql(true);
         expect(area.syncTimer._idleTimeout).to.eql(123000);
-        clearInterval(area.syncTimer);
+        area.config = {};
         done();
       }); // give time for call to stubbed sync method to complete
     });
@@ -342,6 +342,7 @@ describe("StorageArea", function() {
 
     afterEach(function() {
       storage.onChanged.removeListener(changeSpy);
+      area.config = {};
     });
 
     it("fires events for created records", function(done) {
