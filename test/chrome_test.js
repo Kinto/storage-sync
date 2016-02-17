@@ -27,13 +27,47 @@ describe("StorageChange", function() {
 
 /** @test {StorageChangeEvent} */
 describe("StorageChangeEvent", function() {
+  let changes;
+
+  beforeEach(function() {
+    changes = new StorageChangeEvent("sync");
+  });
 
   /** @test {StorageChangeEvent#constructor} */
   describe("#constructor", function() {
     it("should expose areaName and start with no listeners", function() {
-      const changes = new StorageChangeEvent("sync");
       expect(changes.areaName).to.eql("sync");
       expect(changes.listeners).to.eql([]);
+    });
+  });
+
+  /** @test {StorageChangeEvent#constructor} */
+  describe("addListener", function() {
+    it("should add the listener", function() {
+      const listener = function() { return "foo"; };
+      changes.addListener(listener);
+      expect(changes.listeners).to.deep.eql([listener]);
+    });
+  });
+
+  /** @test {StorageChangeEvent#constructor} */
+  describe("removeListener", function() {
+    const listener1 = function() { return "foo"; };
+    const listener2 = function() { return "bar"; };
+
+    beforeEach(function() {
+      changes.addListener(listener1);
+      changes.addListener(listener2);
+    });
+
+    it("should remove the listener (1)", function() {
+      changes.removeListener(listener1);
+      expect(changes.listeners).to.deep.eql([listener2]);
+    });
+
+    it("should remove the listener (2)", function() {
+      changes.removeListener(listener2);
+      expect(changes.listeners).to.deep.eql([listener1]);
     });
   });
 });
@@ -294,14 +328,8 @@ describe("StorageArea", function() {
     let changeSpy;
 
     beforeEach(function() {
-      //TODO: make this nicer once https://github.com/Kinto/kinto-chrome/issues/20
-      //is fixed:
-      if (changeSpy) {
-        changeSpy.reset();
-      } else {
-        changeSpy = sinon.spy();
-        storage.onChanged.addListener(changeSpy);
-      }
+      changeSpy = sandbox.spy();
+      storage.onChanged.addListener(changeSpy);
 
       area.config = {
         type: "kinto",
@@ -310,6 +338,10 @@ describe("StorageArea", function() {
           Authorization: "Basic " + btoa("testuser:s3cr3t")
         }
       };
+    });
+
+    afterEach(function() {
+      storage.onChanged.removeListener(changeSpy);
     });
 
     it("fires events for created records", function(done) {
