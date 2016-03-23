@@ -76,7 +76,7 @@ describe("StorageChangeEvent", function() {
 /** @test {StorageArea} */
 describe("StorageArea", function() {
   const area = new StorageArea("sync");
-  let sandbox, consoleSpy, syncStub, syncResults;
+  let sandbox, consoleSpy, syncStub, syncResults, changeSpy;
 
   beforeEach(function() {
     sandbox = sinon.sandbox.create();
@@ -84,6 +84,8 @@ describe("StorageArea", function() {
     syncStub = sandbox.stub(area.items, "sync", function() {
       return Promise.resolve(syncResults);
     });
+    changeSpy = sandbox.spy();
+    storage.onChanged.addListener(changeSpy);
 
     syncResults = {
       created: [],
@@ -95,6 +97,7 @@ describe("StorageArea", function() {
   });
 
   afterEach(function(done) {
+    storage.onChanged.removeListener(changeSpy);
     sandbox.restore();
     area.items.clear().then(() => done(), done);
   });
@@ -206,6 +209,15 @@ describe("StorageArea", function() {
         });
       });
     });
+
+    it("triggers a change event", function() {
+      expect(changeSpy.args[0]).to.deep.eql([{
+        something: {
+          oldValue: undefined,
+          newValue: 1
+        }
+      }, "sync" ]);
+    });
   });
 
   /** @test {StorageArea#get} */
@@ -289,8 +301,23 @@ describe("StorageArea", function() {
 
       area.set({ foo: "bar" }, function() {
         area.remove(["foo"]);
-        expect(spy.calledWith("acbd18db-4cc2-f85c-edef-654fccc4a4d8")).to.eql(true);
-        done();
+        setTimeout(function() {
+          expect(spy.calledWith("acbd18db-4cc2-f85c-edef-654fccc4a4d8")).to.eql(true);
+          done();
+        });
+      });
+    });
+
+    it("triggers a change event", function() {
+      area.set({ foo: "bar" }, function() {
+        area.remove("foo", function() {
+          expect(changeSpy.args[1]).to.deep.eql([{
+            something: {
+              oldValue: undefined,
+              newValue: 1
+            }
+          }, "sync" ]);
+        });
       });
     });
   });
@@ -334,15 +361,23 @@ describe("StorageArea", function() {
         done();
       });
     });
+
+    it("triggers change events", function() {
+      expect(changeSpy.args[1]).to.deep.eql([{
+        foo: {
+          oldValue: "bar",
+          newValue: undefined
+        },
+        baz: {
+          oldValue: "bar",
+          newValue: undefined
+        }
+      }, "sync" ]);
+    });
   });
 
   describe("sync process", function() {
-    let changeSpy;
-
     beforeEach(function() {
-      changeSpy = sandbox.spy();
-      storage.onChanged.addListener(changeSpy);
-
       area.config = {
         type: "kinto",
         interval: 123000,
