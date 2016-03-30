@@ -9,6 +9,25 @@ compatible wrapper around Kinto.js.
 To see the demo, run:
 
 ````bash
+nvm use 4.4
+mkdir node_modules
+cd node_modules
+git clone https://github.com/dumbmatter/fakeIndexedDB
+mv fakeIndexedDB fake-indexeddb
+cd fake-indexeddb
+npm install
+pwd
+mkdir node_modules
+cd node_modules
+ls
+cd fs-extra
+npm install
+cd ..
+cd ..
+npm install
+cd ..
+cd ..
+
 npm install
 npm run dist
 cd demo ; python -m SimpleHTTPServer
