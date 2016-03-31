@@ -6,6 +6,7 @@
   <body>
       <textarea id="code"></textarea>
       <button onclick="saveChanges()">Save</button>
+      <button onclick="syncToKinto()">Sync to Kinto</button>
 
     <!--script src="kinto-1.1.1.js"></script-->
     <script src="chrome_es5.js"></script>
@@ -48,6 +49,15 @@
                       storageChange.newValue);
         }
       });
+
+      function syncToKinto() {
+        chrome.storage.sync.config = {
+          type: "kinto",
+          interval: 60000, // milliseconds
+          remote: "https://kinto.dev.mozaws.net/v1",
+          headers: {Authorization: "Basic " + btoa("user:pass")}
+        };
+      }
     </script>
 
   </body>
