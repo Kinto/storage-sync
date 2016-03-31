@@ -11,6 +11,7 @@ before_install:
 - virtualenv .env
 - .env/bin/pip install kinto==1.11.0
 - export KINTO_PSERVE_EXECUTABLE=.env/bin/pserve
+- mkdir node_modules ; cd node_modules; git clone https://github.com/dumbmatter/fakeIndexedDB; mv fakeIndexedDB fake-indexeddb; cd fake-indexeddb; npm install; mkdir node_modules; cd node_modules; cd fs-extra; npm install; cd ..; cd ..; npm install; cd ..; cd ..
 env:
 - ACTION=test
 - ACTION="run dist"       # ensures building dist files doesn't break
