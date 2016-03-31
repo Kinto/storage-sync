@@ -1,7 +1,7 @@
-kinto-chrome
+storage-sync
 ============
 
-[![Build Status](https://travis-ci.org/kinto/kinto-chrome.svg?branch=master)](https://travis-ci.org/kinto/kinto-chrome)
+[![Build Status](https://travis-ci.org/kinto/storage-sync.svg?branch=master)](https://travis-ci.org/kinto/storage-sync)
 
 Prototype project to build a [chrome.storage.sync](https://developer.chrome.com/extensions/storage)
 compatible wrapper around Kinto.js.
