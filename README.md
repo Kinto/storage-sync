@@ -6,20 +6,22 @@ storage-sync
 Prototype project to build a [chrome.storage.sync](https://developer.chrome.com/extensions/storage)
 compatible wrapper around Kinto.js.
 
-To see the demo, run:
+Work-around while fake-indexeddb is having some dependency hell problems:
 
-````bash
+```bash
 nvm use 4.4
+mkdir node_modules
+cd node_modules
+git clone https://github.com/kinto/storage-sync
+cd storage-sync
 mkdir node_modules
 cd node_modules
 git clone https://github.com/dumbmatter/fakeIndexedDB
 mv fakeIndexedDB fake-indexeddb
 cd fake-indexeddb
 npm install
-pwd
 mkdir node_modules
 cd node_modules
-ls
 cd fs-extra
 npm install
 cd ..
@@ -27,11 +29,20 @@ cd ..
 npm install
 cd ..
 cd ..
-
 npm install
+cd ..
+cd ..
+```
+
+To see a demo:
+
+```bash
+nvm use 4.4
+npm install storage-sync
+cd node_modules/storage-sync
 npm run dist
 cd demo ; python -m SimpleHTTPServer
-````
+```
 
 and then visit http://localhost:8000/ and see the console.
 
